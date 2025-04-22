@@ -1,13 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { ReportData } from "../services/reportService";
-import { AlertTriangle, CheckCircle, Clock, MapPin } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  MapPin,
+  Trash2,
+} from "lucide-react";
+import axios from "axios";
 
 interface ReportCardProps {
   report: ReportData;
   className?: string;
+  onDelete: (id: string) => void; // Pass delete handler from parent
 }
 
-const ReportCard: React.FC<ReportCardProps> = ({ report, className = "" }) => {
+const ReportCard: React.FC<ReportCardProps> = ({
+  report,
+  className = "",
+  onDelete,
+}) => {
+  const [isDeleting, setIsDeleting] = useState(false); // Track delete state for loading indicator
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error message state
+
   const getStatusBadge = () => {
     switch (report.status) {
       case "pending":
@@ -56,17 +71,38 @@ const ReportCard: React.FC<ReportCardProps> = ({ report, className = "" }) => {
     return `${lat}, ${lng}`;
   };
 
+  const handleDelete = async (_id) => {
+    try {
+      setIsDeleting(true); // Set loading state
+      setErrorMessage(null); // Reset any previous errors
+      // Ensure you're using the correct `id` field (use `_id` if you're using MongoDB/Mongoose)
+      await axios.delete(`http://localhost:5000/api/reports/${report._id}`);
+      onDelete(report._id); // Notify parent component to update the UI
+    } catch (error) {
+      setErrorMessage("Error deleting report. Please try again."); // Display error message
+    } finally {
+      setIsDeleting(false); // Reset loading state
+    }
+  };
+
   return (
     <div
       className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 ${className}`}
     >
       <div className="relative h-48">
         <img
-          src={report.imageUrl}
+          src={`http://localhost:5000${report.imageUrl}`}
           alt="Garbage report"
           className="w-full h-full object-cover"
         />
         <div className="absolute top-2 right-2">{getStatusBadge()}</div>
+        <button
+          onClick={handleDelete}
+          className="absolute top-2 left-2 bg-red-500 text-white p-2 rounded-full"
+          disabled={isDeleting} // Disable button when deleting
+        >
+          {isDeleting ? <span>Deleting...</span> : <Trash2 size={16} />}
+        </button>
       </div>
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
@@ -81,6 +117,11 @@ const ReportCard: React.FC<ReportCardProps> = ({ report, className = "" }) => {
         <p className="text-gray-700 text-sm line-clamp-2 mb-2">
           {report.description}
         </p>
+
+        {/* Display error message if there is one */}
+        {errorMessage && (
+          <div className="text-red-500 text-sm mt-2">{errorMessage}</div>
+        )}
       </div>
     </div>
   );

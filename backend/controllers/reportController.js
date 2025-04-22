@@ -25,3 +25,23 @@ exports.getReports = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch reports" });
   }
 };
+
+exports.deleteReport = async (req, res) => {
+  const { id } = req.params; // Get report id from params
+
+  try {
+    // Attempt to delete the report by id
+    const deletedReport = await Report.findByIdAndDelete(id);
+
+    if (!deletedReport) {
+      return res.status(404).json({ error: "Report not found" });
+    }
+
+    // If successful, return a success message
+    return res.status(200).json({ message: "Report deleted successfully" });
+  } catch (error) {
+    // In case of errors, log them and send a failure response
+    console.error("Error deleting report:", error);
+    return res.status(500).json({ error: "Server error during deletion" });
+  }
+};

@@ -1,6 +1,10 @@
 const express = require("express");
 const multer = require("multer");
-const { createReport, getReports } = require("../controllers/reportController");
+const {
+  createReport,
+  getReports,
+  deleteReport,
+} = require("../controllers/reportController");
 
 const router = express.Router();
 
@@ -14,5 +18,5 @@ const upload = multer({ storage });
 
 router.post("/", upload.single("image"), createReport);
 router.get("/", getReports);
-
+router.delete("/:id", deleteReport);
 module.exports = router;
