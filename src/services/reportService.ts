@@ -19,7 +19,7 @@ const API_BASE_URL =
 export const useReportService = () => {
   const getReports = async (): Promise<ReportData[]> => {
     try {
-      const response = await axios.get(API_BASE_URL);
+      const response = await axios.get(API_BASE_URL + "/reports");
       return response.data;
     } catch (error) {
       console.error("Error fetching reports:", error);
@@ -29,7 +29,9 @@ export const useReportService = () => {
 
   const getRecentReports = async (limit: number): Promise<ReportData[]> => {
     try {
-      const response = await axios.get(`${API_BASE_URL}?limit=${limit}`);
+      const response = await axios.get(
+        `${API_BASE_URL + "/reports"}?limit=${limit}`
+      );
       return response.data;
     } catch (error) {
       console.error("Error fetching recent reports:", error);
@@ -39,7 +41,7 @@ export const useReportService = () => {
 
   const addReport = async (formData: FormData): Promise<ReportData> => {
     try {
-      const response = await axios.post(API_BASE_URL, formData, {
+      const response = await axios.post(API_BASE_URL + "/reports", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
